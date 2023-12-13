@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Employee Management</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+      /* Your CSS styles */
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background-color: #f2f2f2;
+      }
+      /* Header styles */
+      header {
+        background-color: #333;
+        color: #fff;
+        padding: 15px 0;
+        text-align: center;
+      }
+      /* Main container */
+      .container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      h1,
+      h2 {
+        color: #333;
+        text-align: center;
+      }
+      /* Form styles */
+      form {
+        margin-bottom: 20px;
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+      }
+      input[type="text"],
+      input[type="number"],
+      input[type="file"],
+      button[type="submit"],
+      button[type="button"] {
+        width: calc(100% - 22px);
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+        box-sizing: border-box;
+      }
+      input[type="file"] {
+        padding-top: 5px;
+        padding-bottom: 5px;
+      }
+      button[type="submit"],
+      button[type="button"] {
+        background-color: #4caf50;
+        color: white;
+        cursor: pointer;
+      }
+      button[type="submit"]:hover,
+      button[type="button"]:hover {
+        background-color: #45a049;
+      }
+      /* Employee info display */
+      .employee-info {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 10px;
+        text-align: center;
+      }
+      .employee-info img {
+        max-width: 100%;
+        border-radius: 4px;
+        margin-bottom: 10px;
+      }
+      .employee-info ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        text-align: left;
+      }
+      .employee-info ul li {
+        margin-bottom: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Employee Management System</h1>
+
+      <form id="searchForm">
+        <label for="employeeId">Enter Employee ID:</label>
+        <input type="number" id="employeeId" name="employeeId" required />
+        <button type="submit">Search</button>
+      </form>
+
+      <div id="employeeInfo" class="employee-info">
+        <p>Please enter an Employee ID</p>
+      </div>
+
+      <h2>Add Employee Information</h2>
+      <form id="newEmployeeForm">
+        <label for="newEmployeeName">ID:</label>
+        <input type="text" id="id_Nhanvien" name="id" required /><br />
+        <label for="newEmployeeName">Name:</label>
+        <input type="text" id="ten_Nhanvien" name="name" required /><br />
+        <label for="newEmployeeGender">Gender:</label>
+        <input type="text" id="gioitinh" name="gender" required /><br />
+        <label for="newEmployeeAge">DayOfBirth:</label>
+        <input type="text" id="ngaysinh" name="dob" required /><br />
+        <label for="newEmployeeAddress">Address:</label>
+        <input type="text" id="diachi" name="address" required /><br />
+        <label for="newEmployeePhone">Phone:</label>
+        <input type="text" id="sodienthoai" name="phone" required /><br />
+        <label for="newEmployeePosition">Position:</label>
+        <input type="text" id="vitri" name="position" required /><br />
+        <label for="employeeImage">Capture Image:</label>
+        <input
+          type="file"
+          accept="image/*"
+          id="employeeImage"
+          name="image"
+          capture="camera"
+          required
+        /><br />
+        <label for="employeeVideo">Capture Video:</label>
+        <input
+          type="file"
+          accept="video/*"
+          id="employeeVideo"
+          name="video"
+          capture="camcorder"
+          required
+        /><br />
+        <button type="submit">Save Employee Information</button>
+      </form>
+    </div>
+
+    <script>
+      $(document).ready(function () {
+        // Handle employee search
+        function handleEmployeeSearch() {
+          var employeeId = $("#employeeId").val();
+          if (employeeId !== "") {
+            $.ajax({
+              url: "/api/image/" + employeeId,
+              method: "GET",
+              success: function (data) {
+                $("#employeeInfo").html(data);
+              },
+              error: function () {
+                $("#employeeInfo").html("<p>No information available</p>");
+              },
+            });
+          } else {
+            $("#employeeInfo").html("<p>Please enter an Employee ID</p>");
+          }
+        }
+        $("#searchForm").submit(function (e) {
+          e.preventDefault();
+          handleEmployeeSearch();
+        });
+
+        // Handle form submission for new employee info
+        $("#newEmployeeForm").submit(function (e) {
+          e.preventDefault();
+          const employeeId = $("#id_Nhanvien").val();
+          const employeeName = $("#ten_Nhanvien").val();
+          const employeeGender = $("#gioitinh").val();
+          const employeeDOB = $("#ngaysinh").val();
+          const employeeAddress = $("#diachi").val();
+          const employeePhone = $("#sodienthoai").val();
+          const employeePosition = $("#vitri").val();
+          const imageFile = $("#employeeImage").prop("files")[0];
+          const videoFile = $("#employeeVideo").prop("files")[0];
+
+          const formData = new FormData();
+
+          // Prepare form data
+          formData.append("id", employeeId);
+          formData.append("name", employeeName);
+          formData.append("gender", employeeGender);
+          formData.append("dob", employeeDOB);
+          formData.append("address", employeeAddress);
+          formData.append("phone", employeePhone);
+          formData.append("position", employeePosition);
+          formData.append("image", imageFile);
+          formData.append("video", videoFile);
+
+          $.ajax({
+            url: "/add/employee",
+            method: "POST",
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (response) {
+              console.log("Employee information saved:", response);
+              $("#id_Nhanvien").val("");
+              $("#ten_Nhanvien").val("");
+              $("#gioitinh").val("");
+              $("#ngaysinh").val("");
+              $("#diachi").val("");
+              $("#sodienthoai").val("");
+              $("#vitri").val("");
+              $("#employeeImage").val("");
+              $("#employeeVideo").val("");
+
+              // Reset form fields or perform any other necessary actions
+            },
+            error: function (error) {
+              console.error("Error saving employee information:", error);
+            },
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
