@@ -16,81 +16,29 @@ client = MongoClient(uri, server_api=ServerApi('1'))
 # Connect to the database
 mydb = client["CHAMCONG"]
 mycol1 = mydb["HinhAnhNhanVien"]
-mycol2 = mydb["HinhAnhNhanVienDaChamCong"]
-mycol3 = mydb["HinhAnhNhanVienChuaChamCong"]
-mycol4 = mydb["ThongTinNhanVien"]
+mycol2 = mydb["HinhAnhNhanVienMoi"]
 
-# #insert image
-# def insert_image():
-#     # Open the image file
-#     im = Image.open("Dataprocess/6.jpg")
+# Update checkin time
+def update_thoigianchamcong(employee_id):
+    gio_vao = datetime.now().isoformat()
+    mycol1.update_one({'id_Nhanvien': employee_id}, {'$set': {'timestamp': gio_vao}})
+    print('Time checkin updated successfully.')
 
-#     # Convert the image to a bytearray
-#     image_bytes = io.BytesIO()
-#     im.save(image_bytes, format='JPEG')
-
-#     # Prepare data for MongoDB
-#     image_data = {
-#         'id_Nhanvien': 1,  # Replace 'your_specific_id' with your desired ID
-#         'ten_Nhanvien': 'Le Hoang Thinh',  # Replace 'your_specific_name' with your desired name
-#         'gioitinh': 'Nam',
-#         'ngaysinh': '2000-01-01',
-#         'diachi':   'Quang Nam',
-#         'sodienthoai':  '0123456789',
-#         'vitri':    'Fresher',
-#         'data': image_bytes.getvalue(),
-#         'timestamp': datetime.now(),
-#         'tongsogiocong': 0,
-#         'tienluong': 0
-#     }
-
-#     # Insert the image data into the collection
-#     mycol1.insert_one(image_data)
-#     print('Image inserted successfully.')
-
-def display_image_by_id(collection, employee_id):
-    images = mycol1  # Change to your desired collection
-    image = images.find_one()
-    image = collection.find_one({'id_Nhanvien': employee_id})
-    if image is not None:
-        pil_img = Image.open(io.BytesIO(image['data']))
-        plt.imshow(pil_img)
-        plt.show()
-    else:
-        print(f"No image found with ID {employee_id}.")
-
-# Display an image by its ID (change 'your_image_id' to the desired ID)
-display_image_by_id(mycol1, 1)  # Change the ID to the desired image ID
-
-#update tống số giờ công
+# Update total working hours
 def update_tongsogiocong(employee_id):
-    
-    # Input the gio_vao (entry time) from the user
     gio_vao = datetime.now().strftime("%H:%M:%S")
-
-    # Split the input string to get hour part
     gio_vao_hour = int(gio_vao.split(':')[0])
-
-    # Calculate additional working hours if entry time is before 8:00 AM
     additional_hours = 8 if gio_vao_hour < 9 else 0
-
-    # Get the existing tongsogiocong for the employee
     existing_tongsogiocong = mycol1.find_one({'id_Nhanvien': employee_id})['tongsogiocong']
-
-    # Update tongsogiocong field for the specified employee ID with additional hours
     updated_tongsogiocong = existing_tongsogiocong + additional_hours
-
-    # Update the 'tongsogiocong' field for the specified employee ID
     mycol1.update_one({'id_Nhanvien': employee_id}, {'$set': {'tongsogiocong': updated_tongsogiocong}})
-    print('Tong so gio cong updated successfully.')
+    print('Total working hours updated successfully.')
 
-update_tongsogiocong(employee_id=1)
-
+# Update salary
 def update_tienluong(employee_id):
-    # Get the existing tongsogiocong for the employee
     existing_tongsogiocong = mycol1.find_one({'id_Nhanvien': employee_id})['tongsogiocong']
     existing_vitri = mycol1.find_one({'id_Nhanvien': employee_id})['vitri']
-    tienluong_per_hour = 0 
+    tienluong_per_hour = 0
 
     if existing_vitri == 'Fresher':
         tienluong_per_hour = 25000
@@ -99,13 +47,43 @@ def update_tienluong(employee_id):
     elif existing_vitri == 'Junior':
         tienluong_per_hour = 40000
 
-    # Calculate the salary for the employee
     salary = existing_tongsogiocong * tienluong_per_hour
-
-    # Update the 'tienluong' field for the specified employee ID
     mycol1.update_one({'id_Nhanvien': employee_id}, {'$set': {'tienluong': salary}})
-    print('Tien luong updated successfully.')
-# #main
+    print('Salary updated successfully.')
 
-update_tienluong(employee_id=1)
+# Check if name exists in the database
+def check_name(employee_name):
+    existing_employee = mycol1.find_one({'ten_Nhanvien': employee_name})
+    return existing_employee is not None
 
+# Create a dictionary with name as key and id as value
+def create_dict(employee_name):
+    result = mycol1.find_one({'ten_Nhanvien': employee_name})
+    
+    if result:
+        name_id_dict = {result['ten_Nhanvien']: result['id_Nhanvien']}
+        return name_id_dict
+    else:
+        print("Employee not found in the database.")
+        return {}
+
+
+# Main
+name = 'Thong'
+arg = ['Nguyen Linh Anh Khoa', 'Phan Duy Thong', 'Le Hoang Thinh', 'Truong Huu Khang', 'Truong Trong Hieu', 'Ha Vinh Kien']
+
+employee_name = None
+
+for item in arg:
+    if name in item:
+        employee_name = item
+        break
+
+if check_name(employee_name):
+    name_id_dict = create_dict(employee_name)
+    employee_id = list(name_id_dict.values())[0]
+    update_tongsogiocong(employee_id)
+    update_tienluong(employee_id)
+    update_thoigianchamcong(employee_id)
+else:
+    print(f'Employee with name {employee_name} not found in the database.')

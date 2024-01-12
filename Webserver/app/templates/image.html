@@ -1,34 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee Information</title>
-  </head>
-  <body>
-    <div>
-      <!-- Hiển thị hình ảnh của nhân viên -->
-      <div style="height: 200px; width: 150px">
-        <img
-          src="data:image/jpeg;base64,{{ img_data }}"
-          alt="Employee Image"
-          height="200"
-          width="150"
-        />
-      </div>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
 
-      <!-- Hiển thị thông tin của nhân viên -->
-      {% if info %}
-      <ul>
-        <li>ID: {{ info.id_Nhanvien }}</li>
-        <li>Name: {{ info.ten_Nhanvien }}</li>
-        <li>Timestamp: {{ info.timestamp }}</li>
-        <li>Total Working Hours: {{ info.tongsogiocong }}</li>
-        <li>Salary: {{ info.tienluong }}</li>
-      </ul>
-      {% else %}
-      <p>No information available</p>
-      {% endif %}
+        .employee-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .employee-image {
+            height: 200px;
+            width: 150px;
+            margin-bottom: 20px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="employee-container">
+        <!-- Display employee image -->
+        <div class="employee-image">
+            <img src="data:image/jpeg;base64,{{ img_data }}" alt="Employee Image" height="200" width="150" />
+        </div>
+
+        <!-- Display employee information -->
+        {% if info %}
+            <ul>
+                <li>ID: {{ info.id_Nhanvien }}</li>
+                <li>Name: {{ info.ten_Nhanvien }}</li>
+                <li>ThoiGianChamCong: {{ info.timestamp }}</li>
+                <li>Total Working Hours: {{ info.tongsogiocong }}</li>
+                <li>Salary: {{ info.tienluong }}</li>
+            </ul>
+        {% else %}
+            <p>No information available</p>
+        {% endif %}
     </div>
-  </body>
+</body>
 </html>
